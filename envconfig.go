@@ -113,6 +113,8 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		}
 		if info.Alt != "" {
 			info.Key = info.Alt
+		} else {
+			info.Alt = strings.ToUpper(info.Key)
 		}
 		if prefix != "" {
 			info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
