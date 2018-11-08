@@ -47,7 +47,7 @@ func (e *ParseError) Error() string {
 // varInfo maintains information about the configuration variable
 type varInfo struct {
 	Name  string
-	Alt   string
+	Alt   []string
 	Key   string
 	Field reflect.Value
 	Tags  reflect.StructTag
@@ -93,7 +93,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			Name:  ftype.Name,
 			Field: f,
 			Tags:  ftype.Tag,
-			Alt:   strings.ToUpper(ftype.Tag.Get("envconfig")),
+			Alt:   generateAlternatives(strings.ToUpper(ftype.Tag.Get("envconfig")), ftype.Name),
 		}
 
 		// Default to the field name as the env var name (will be upcased)
@@ -111,13 +111,14 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 				info.Key = strings.Join(name, "_")
 			}
 		}
-		if info.Alt != "" {
-			info.Key = info.Alt
+		if info.Alt[0] != "" {
+			info.Key = info.Alt[0]
 		} else {
-			info.Alt = strings.ToUpper(info.Key)
+			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		if prefix != "" {
 			info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
+			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		info.Key = strings.ToUpper(info.Key)
 		infos = append(infos, info)
@@ -144,6 +145,19 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 	return infos, nil
 }
 
+func generateAlternatives(matrice, name string) []string {
+	alts := []string{matrice}
+	split := strings.Split(matrice, "_")
+	for i := 1; i < len(split); i++ {
+		alt := strings.Join(split[i:], "_")
+		if alt == name {
+			break
+		}
+		alts = append(alts, alt)
+	}
+	return alts
+}
+
 // Process populates the specified struct based on environment variables
 func Process(prefix string, spec interface{}) error {
 	infos, err := gatherInfo(prefix, spec)
@@ -155,8 +169,13 @@ func Process(prefix string, spec interface{}) error {
 		// but it is only available in go1.5 or newer. We're using Go build tags
 		// here to use os.LookupEnv for >=go1.5
 		value, ok := lookupEnv(info.Key)
-		if !ok && info.Alt != "" {
-			value, ok = lookupEnv(info.Alt)
+		if !ok {
+			for _, alt := range info.Alt {
+				value, ok = lookupEnv(alt)
+				if ok {
+					break
+				}
+			}
 		}
 
 		def := info.Tags.Get("default")
