@@ -308,8 +308,8 @@ func TestUnsetVars(t *testing.T) {
 
 	// If the var is not defined the non-prefixed version should not be used
 	// unless the struct tag says so
-	if s.User != "" {
-		t.Errorf("expected %q, got %q", "", s.User)
+	if s.User != "foo" {
+		t.Errorf("expected %q, got %q", "foo", s.User)
 	}
 }
 
@@ -771,6 +771,22 @@ func TestCheckDisallowedIgnored(t *testing.T) {
 	err := CheckDisallowed("env_config", &s)
 	if experr := "unknown environment variable ENV_CONFIG_IGNORED"; err.Error() != experr {
 		t.Errorf("expected %s, got %s", experr, err)
+	}
+}
+
+func TestPrefix(t *testing.T) {
+	var s Specification
+	os.Clearenv()
+	os.Setenv("REQUIREDVAR", "foo")
+	os.Setenv("DEBUG", "true")
+	os.Setenv("PORT", "80")
+
+	err := Process("env_config", &s)
+	if err != nil {
+		t.Errorf("no error expected, got %v", err)
+	}
+	if s.Debug != true {
+		t.Errorf("expected %v, got %v", true, s.Debug)
 	}
 }
 
