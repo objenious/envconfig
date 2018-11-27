@@ -1,14 +1,14 @@
 # envconfig
 
-[![Build Status](https://travis-ci.org/envconfig/envconfig.svg)](https://travis-ci.org/envconfig/envconfig)
+[![Build Status](https://travis-ci.org/objenious/envconfig.svg)](https://travis-ci.org/objenious/envconfig)
 
 ```Go
-import "github.com/envconfig/envconfig"
+import "github.com/objenious/envconfig"
 ```
 
 ## Documentation
 
-See [godoc](http://godoc.org/github.com/envconfig/envconfig)
+See [godoc](http://godoc.org/github.com/objenious/envconfig)
 
 ## Usage
 
@@ -34,7 +34,7 @@ import (
     "log"
     "time"
 
-    "github.com/envconfig/envconfig"
+    "github.com/objenious/envconfig"
 )
 
 type Specification struct {
