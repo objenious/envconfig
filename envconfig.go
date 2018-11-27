@@ -116,12 +116,12 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			}
 		}
 		if info.Alt[0] != "" {
-			info.Key = info.Alt[0]
+			info.Key = strings.Replace(info.Alt[0], "__", "_", -1)
 		} else {
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		if prefix != "" {
-			info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
+			info.Key = strings.Replace(fmt.Sprintf("%s_%s", prefix, info.Key), "__", "_", -1)
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		info.Key = strings.ToUpper(info.Key)
