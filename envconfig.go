@@ -120,7 +120,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		if info.Alt[0] != "" {
 			info.Key = info.Alt[0]
 		} else {
-			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
+			info.Alt = generateAlternatives(strings.ToUpper(info.Key), getVarName(ftype.Name, ftype.Tag.Get("envconfig")))
 		}
 		if prefix != "" {
 			if info.Key != "" {
@@ -128,7 +128,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			} else {
 				info.Key = prefix
 			}
-			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
+			info.Alt = generateAlternatives(strings.ToUpper(info.Key), getVarName(ftype.Name, ftype.Tag.Get("envconfig")))
 		}
 		info.Key = strings.ToUpper(info.Key)
 		infos = append(infos, info)
@@ -152,15 +152,22 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 	return infos, nil
 }
 
+func getVarName(varname, vartag string) string {
+	if vartag != "" {
+		return strings.ToUpper(vartag)
+	}
+	return strings.ToUpper(varname)
+}
+
 func generateAlternatives(matrice, name string) []string {
 	alts := []string{matrice}
 	split := strings.Split(matrice, "_")
 	for i := 1; i < len(split); i++ {
 		alt := strings.Join(split[i:], "_")
+		alts = append(alts, alt)
 		if alt == name {
 			break
 		}
-		alts = append(alts, alt)
 	}
 	return alts
 }

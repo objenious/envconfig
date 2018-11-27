@@ -55,6 +55,10 @@ type Config5 struct {
 	Name   string
 }
 
+type Config6 struct {
+	Name string `envconfig:"config_name" default:"default"`
+}
+
 type Env map[string]string
 
 func (e Env) setEnv() {
@@ -374,6 +378,16 @@ func TestConfigs(t *testing.T) {
 				},
 				Path: *expected,
 				Name: "test-multi",
+			},
+		},
+		{
+			"test",
+			Env{
+				"NAME": "8080",
+			},
+			&Config6{},
+			&Config6{
+				Name: "default",
 			},
 		},
 	}
