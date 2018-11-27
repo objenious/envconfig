@@ -109,19 +109,25 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			if len(words) > 0 {
 				var name []string
 				for _, words := range words {
-					name = append(name, words[0])
+					if words[0] != "" {
+						name = append(name, words[0])
+					}
 				}
 
 				info.Key = strings.Join(name, "_")
 			}
 		}
 		if info.Alt[0] != "" {
-			info.Key = strings.Replace(info.Alt[0], "__", "_", -1)
+			info.Key = info.Alt[0]
 		} else {
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		if prefix != "" {
-			info.Key = strings.Replace(fmt.Sprintf("%s_%s", prefix, info.Key), "__", "_", -1)
+			if info.Key != "" {
+				info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
+			} else {
+				info.Key = prefix
+			}
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		info.Key = strings.ToUpper(info.Key)
@@ -147,7 +153,6 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 }
 
 func generateAlternatives(matrice, name string) []string {
-	matrice = strings.Replace(matrice, "__", "_", -1)
 	alts := []string{matrice}
 	split := strings.Split(matrice, "_")
 	for i := 1; i < len(split); i++ {
