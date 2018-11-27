@@ -43,6 +43,18 @@ type Config3 struct {
 	Name string
 }
 
+type Config4 struct {
+	Config
+	Path Config
+	Name string
+}
+
+type Config5 struct {
+	Config `envconfig:"current"`
+	Path   Config
+	Name   string
+}
+
 type Env map[string]string
 
 func (e Env) setEnv() {
@@ -132,14 +144,29 @@ func TestConfigs(t *testing.T) {
 		{
 			"test",
 			Env{
-				"TEST_HTTPPORT":           "8088",
-				"LIVENESSCHECKPATH":       "/test/live",
-				"TEST_READINESSCHECKPATH": "/test/ready",
-				"TEST_ENABLEPPROF":        "true",
-				"PUBSUBA_TOPIC":           "topicA",
-				"MAX_EXTENSION":           "11h",
-				"TOPIC":                   "topicB",
+				"TEST_HTTPPORT":              "8088",
+				"LIVENESSCHECKPATH":          "/test/live",
+				"TEST_READINESSCHECKPATH":    "/test/ready",
+				"TEST_ENABLEPPROF":           "true",
+				"PUBSUBA_TOPIC":              "topicA",
+				"MAX_EXTENSION":              "11h",
+				"TOPIC":                      "topicB",
 				"TEST_PUBSUBB_MAX_EXTENSION": "22m",
+			},
+			&Config{},
+			expected,
+		},
+		{
+			"path",
+			Env{
+				"PATH_HTTPPORT":              "8088",
+				"LIVENESSCHECKPATH":          "/test/live",
+				"PATH_READINESSCHECKPATH":    "/test/ready",
+				"PATH_ENABLEPPROF":           "true",
+				"PUBSUBA_TOPIC":              "topicA",
+				"MAX_EXTENSION":              "11h",
+				"TOPIC":                      "topicB",
+				"PATH_PUBSUBB_MAX_EXTENSION": "22m",
 			},
 			&Config{},
 			expected,
@@ -147,21 +174,21 @@ func TestConfigs(t *testing.T) {
 		{
 			"test",
 			Env{
-				"TEST_CONFIG_HTTPPORT":           "8080",
-				"CONFIG_LIVENESSCHECKPATH":       "/cfg/live",
-				"TEST_CONFIG_READINESSCHECKPATH": "/cfg/ready",
-				"TEST_CONFIG_ENABLEPPROF":        "true",
-				"CONFIG_PUBSUBA_TOPIC":           "topicA-prod",
-				"MAX_EXTENSION":                  "11h",
-				"TOPIC":                          "topicB",
+				"TEST_CONFIG_HTTPPORT":              "8080",
+				"CONFIG_LIVENESSCHECKPATH":          "/cfg/live",
+				"TEST_CONFIG_READINESSCHECKPATH":    "/cfg/ready",
+				"TEST_CONFIG_ENABLEPPROF":           "true",
+				"CONFIG_PUBSUBA_TOPIC":              "topicA-prod",
+				"MAX_EXTENSION":                     "11h",
+				"TOPIC":                             "topicB",
 				"TEST_CONFIG_PUBSUBB_MAX_EXTENSION": "33m",
-				"NAME":                           "test-multi",
-				"TEST_OLD_HTTPPORT":              "8088",
-				"OLD_LIVENESSCHECKPATH":          "/test/live",
-				"TEST_OLD_READINESSCHECKPATH":    "/test/ready",
-				"TEST_OLD_ENABLEPPROF":           "true",
-				"OLD_PUBSUBA_TOPIC":              "topicA",
-				"TEST_OLD_PUBSUBB_MAX_EXTENSION": "22m",
+				"NAME":                              "test-multi",
+				"TEST_OLD_HTTPPORT":                 "8088",
+				"OLD_LIVENESSCHECKPATH":             "/test/live",
+				"TEST_OLD_READINESSCHECKPATH":       "/test/ready",
+				"TEST_OLD_ENABLEPPROF":              "true",
+				"OLD_PUBSUBA_TOPIC":                 "topicA",
+				"TEST_OLD_PUBSUBB_MAX_EXTENSION":    "22m",
 			},
 			&Config2{},
 			&Config2{
@@ -188,14 +215,14 @@ func TestConfigs(t *testing.T) {
 		{
 			"test",
 			Env{
-				"TEST_HTTPPORT":           "8080",
-				"LIVENESSCHECKPATH":       "/cfg/live",
-				"TEST_READINESSCHECKPATH": "/cfg/ready",
-				"TEST_ENABLEPPROF":        "true",
-				"PUBSUBA_TOPIC":           "topicA-prod",
-				"MAX_EXTENSION":           "11h",
-				"TOPIC":                   "topicB",
-				"TEST_PUBSUBB_MAX_EXTENSION": "33m",
+				"TEST_HTTPPORT":                  "8080",
+				"LIVENESSCHECKPATH":              "/cfg/live",
+				"TEST_READINESSCHECKPATH":        "/cfg/ready",
+				"TEST_ENABLEPPROF":               "true",
+				"PUBSUBA_TOPIC":                  "topicA-prod",
+				"MAX_EXTENSION":                  "11h",
+				"TOPIC":                          "topicB",
+				"TEST_PUBSUBB_MAX_EXTENSION":     "33m",
 				"NAME":                           "test-multi",
 				"TEST_OLD_HTTPPORT":              "8088",
 				"OLD_LIVENESSCHECKPATH":          "/test/live",
@@ -223,6 +250,129 @@ func TestConfigs(t *testing.T) {
 					},
 				},
 				Old:  *expected,
+				Name: "test-multi",
+			},
+		},
+		{
+			"path",
+			Env{
+				"PATH_HTTPPORT":                  "8080",
+				"LIVENESSCHECKPATH":              "/cfg/live",
+				"PATH_READINESSCHECKPATH":        "/cfg/ready",
+				"PATH_ENABLEPPROF":               "true",
+				"PUBSUBA_TOPIC":                  "topicA-prod",
+				"MAX_EXTENSION":                  "11h",
+				"TOPIC":                          "topicB",
+				"PATH_PUBSUBB_MAX_EXTENSION":     "33m",
+				"NAME":                           "test-multi",
+				"PATH_OLD_HTTPPORT":              "8088",
+				"OLD_LIVENESSCHECKPATH":          "/test/live",
+				"PATH_OLD_READINESSCHECKPATH":    "/test/ready",
+				"PATH_OLD_ENABLEPPROF":           "true",
+				"OLD_PUBSUBA_TOPIC":              "topicA",
+				"PATH_OLD_PUBSUBB_MAX_EXTENSION": "22m",
+			},
+			&Config3{},
+			&Config3{
+				Config: Config{
+					HTTPConfig: HTTPConfig{
+						HTTPPort:           8080,
+						LivenessCheckPath:  "/cfg/live",
+						ReadinessCheckPath: "/cfg/ready",
+						EnablePProf:        true,
+					},
+					PubSubA: PubSubConfig{
+						Topic:        "topicA-prod",
+						MaxExtension: time.Duration(11 * time.Hour),
+					},
+					PubSubB: PubSubConfig{
+						Topic:        "topicB",
+						MaxExtension: time.Duration(33 * time.Minute),
+					},
+				},
+				Old:  *expected,
+				Name: "test-multi",
+			},
+		},
+		{
+			"test",
+			Env{
+				"TEST_HTTPPORT":                   "8080",
+				"LIVENESSCHECKPATH":               "/cfg/live",
+				"TEST_READINESSCHECKPATH":         "/cfg/ready",
+				"TEST_ENABLEPPROF":                "true",
+				"PUBSUBA_TOPIC":                   "topicA-prod",
+				"MAX_EXTENSION":                   "11h",
+				"TOPIC":                           "topicB",
+				"TEST_PUBSUBB_MAX_EXTENSION":      "33m",
+				"NAME":                            "test-multi",
+				"TEST_PATH_HTTPPORT":              "8088",
+				"PATH_LIVENESSCHECKPATH":          "/test/live",
+				"TEST_PATH_READINESSCHECKPATH":    "/test/ready",
+				"TEST_PATH_ENABLEPPROF":           "true",
+				"PATH_PUBSUBA_TOPIC":              "topicA",
+				"TEST_PATH_PUBSUBB_MAX_EXTENSION": "22m",
+			},
+			&Config4{},
+			&Config4{
+				Config: Config{
+					HTTPConfig: HTTPConfig{
+						HTTPPort:           8080,
+						LivenessCheckPath:  "/cfg/live",
+						ReadinessCheckPath: "/cfg/ready",
+						EnablePProf:        true,
+					},
+					PubSubA: PubSubConfig{
+						Topic:        "topicA-prod",
+						MaxExtension: time.Duration(11 * time.Hour),
+					},
+					PubSubB: PubSubConfig{
+						Topic:        "topicB",
+						MaxExtension: time.Duration(33 * time.Minute),
+					},
+				},
+				Path: *expected,
+				Name: "test-multi",
+			},
+		},
+		{
+			"test",
+			Env{
+				"TEST_CURRENT_HTTPPORT":              "8080",
+				"LIVENESSCHECKPATH":                  "/cfg/live",
+				"TEST_CURRENT_READINESSCHECKPATH":    "/cfg/ready",
+				"TEST_CURRENT_ENABLEPPROF":           "true",
+				"PUBSUBA_TOPIC":                      "topicA-prod",
+				"MAX_EXTENSION":                      "11h",
+				"TOPIC":                              "topicB",
+				"TEST_CURRENT_PUBSUBB_MAX_EXTENSION": "33m",
+				"NAME":                               "test-multi",
+				"TEST_PATH_HTTPPORT":                 "8088",
+				"PATH_LIVENESSCHECKPATH":             "/test/live",
+				"TEST_PATH_READINESSCHECKPATH":       "/test/ready",
+				"TEST_PATH_ENABLEPPROF":              "true",
+				"PATH_PUBSUBA_TOPIC":                 "topicA",
+				"TEST_PATH_PUBSUBB_MAX_EXTENSION":    "22m",
+			},
+			&Config5{},
+			&Config5{
+				Config: Config{
+					HTTPConfig: HTTPConfig{
+						HTTPPort:           8080,
+						LivenessCheckPath:  "/cfg/live",
+						ReadinessCheckPath: "/cfg/ready",
+						EnablePProf:        true,
+					},
+					PubSubA: PubSubConfig{
+						Topic:        "topicA-prod",
+						MaxExtension: time.Duration(11 * time.Hour),
+					},
+					PubSubB: PubSubConfig{
+						Topic:        "topicB",
+						MaxExtension: time.Duration(33 * time.Minute),
+					},
+				},
+				Path: *expected,
 				Name: "test-multi",
 			},
 		},

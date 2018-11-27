@@ -99,7 +99,9 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		}
 
 		// Default to the field name as the env var name (will be upcased)
-		info.Key = info.Name
+		if !ftype.Anonymous {
+			info.Key = info.Name
+		}
 
 		// Best effort to un-pick camel casing as separate words
 		if isTrue(ftype.Tag.Get("split_words")) {
@@ -107,7 +109,9 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			if len(words) > 0 {
 				var name []string
 				for _, words := range words {
-					name = append(name, words[0])
+					if words[0] != "" {
+						name = append(name, words[0])
+					}
 				}
 
 				info.Key = strings.Join(name, "_")
@@ -119,7 +123,11 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		if prefix != "" {
-			info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
+			if info.Key != "" {
+				info.Key = fmt.Sprintf("%s_%s", prefix, info.Key)
+			} else {
+				info.Key = prefix
+			}
 			info.Alt = generateAlternatives(strings.ToUpper(info.Key), ftype.Name)
 		}
 		info.Key = strings.ToUpper(info.Key)
@@ -128,10 +136,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		if f.Kind() == reflect.Struct {
 			// honor Decode if present
 			if decoderFrom(f) == nil && setterFrom(f) == nil && textUnmarshaler(f) == nil && binaryUnmarshaler(f) == nil {
-				innerPrefix := prefix
-				if !ftype.Anonymous {
-					innerPrefix = info.Key
-				}
+				innerPrefix := info.Alt[0]
 
 				embeddedPtr := f.Addr().Interface()
 				embeddedInfos, err := gatherInfo(innerPrefix, embeddedPtr)
