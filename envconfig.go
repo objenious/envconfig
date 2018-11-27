@@ -99,7 +99,9 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		}
 
 		// Default to the field name as the env var name (will be upcased)
-		info.Key = info.Name
+		if !ftype.Anonymous {
+			info.Key = info.Name
+		}
 
 		// Best effort to un-pick camel casing as separate words
 		if isTrue(ftype.Tag.Get("split_words")) {
@@ -128,10 +130,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 		if f.Kind() == reflect.Struct {
 			// honor Decode if present
 			if decoderFrom(f) == nil && setterFrom(f) == nil && textUnmarshaler(f) == nil && binaryUnmarshaler(f) == nil {
-				innerPrefix := prefix
-				if !ftype.Anonymous {
-					innerPrefix = info.Key
-				}
+				innerPrefix := info.Alt[0]
 
 				embeddedPtr := f.Addr().Interface()
 				embeddedInfos, err := gatherInfo(innerPrefix, embeddedPtr)
@@ -148,6 +147,7 @@ func gatherInfo(prefix string, spec interface{}) ([]varInfo, error) {
 }
 
 func generateAlternatives(matrice, name string) []string {
+	matrice = strings.Replace(matrice, "__", "_", -1)
 	alts := []string{matrice}
 	split := strings.Split(matrice, "_")
 	for i := 1; i < len(split); i++ {
