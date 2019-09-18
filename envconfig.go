@@ -164,6 +164,9 @@ func generateAlternatives(matrice, name string) []string {
 	split := strings.Split(matrice, "_")
 	for i := 1; i < len(split); i++ {
 		alt := strings.Join(split[i:], "_")
+		if alt == "PATH" {
+			break
+		}
 		alts = append(alts, alt)
 		if alt == name {
 			break
